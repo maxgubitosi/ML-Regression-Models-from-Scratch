@@ -10,16 +10,18 @@ def train_test_split(df, test_size=0.2, seed=42):
     test_df = df.iloc[train_size:].reset_index(drop=True)
     return train_df, test_df
 
-def fit_linear_regression(X, y, M):
-    # Generate polynomial features
-    Phi = np.ones((X.shape[0], 1)) 
-    for i in range(1, M+1):
-        Phi = np.c_[Phi, X**i]
+
+# def fit_linear_regression(X, y, M):
+#     # Generate polynomial features
+#     Phi = np.ones((X.shape[0], 1)) 
+#     for i in range(1, M+1):
+#         Phi = np.c_[Phi, X**i]
     
-    # Compute weights using the normal equation
-    W = np.linalg.inv(Phi.T @ Phi) @ Phi.T @ y
+#     # Compute weights using the normal equation
+#     W = np.linalg.inv(Phi.T @ Phi) @ Phi.T @ y
     
-    return W
+#     return W
+
 
 def predict_linear_regression(X, w):
     X = np.hstack((np.ones((X.shape[0], 1)), X)) 
@@ -34,10 +36,12 @@ def normalize(X, mean=None, std=None):
     X_norm = (X - mean) / std
     return X_norm, mean, std
 
+
 def one_hot_encoding(df, column):
     df = pd.concat([df, pd.get_dummies(df[column], prefix=column)], axis=1)
     df = df.drop(column, axis=1)
     return df
+
 
 def fit_ridge_regression(X, y, lmbda):
     X = np.hstack((np.ones((X.shape[0], 1)), X))
@@ -46,8 +50,10 @@ def fit_ridge_regression(X, y, lmbda):
     W = np.linalg.inv(X.T @ X + lmbda * I) @ X.T @ y
     return W
 
+
 def mse(y1, y2):
     return np.mean((y1 - y2)**2)
+
 
 def cross_validation_ridge(X, y, lmbdas, k=10, seed=42):
     np.random.seed(seed)
@@ -55,7 +61,6 @@ def cross_validation_ridge(X, y, lmbdas, k=10, seed=42):
     mse_train = np.zeros((len(lmbdas), k))
     mse_test = np.zeros((len(lmbdas), k))
     
-    min_mse_values = (0, 0)
     for i, lmbda in enumerate(lmbdas):
         idx = np.random.permutation(n)
         X_shuffled = X.iloc[idx]  
@@ -73,17 +78,14 @@ def cross_validation_ridge(X, y, lmbdas, k=10, seed=42):
             mse_train[i, j] = mse(y_train, y_train_pred)
             mse_test[i, j] = mse(y_test, y_test_pred)
 
-            if mse_test[i, j] < mse_test[min_mse_values]:
-                min_mse_values = (i, j)
+        # # grafico mse_train y mse_test en mismo grafico
+        # plt.figure()
+        # plt.plot(mse_train[i], label='train')
+        # plt.plot(mse_test[i], label='test')
+        # plt.title(f'MSE for lambda={lmbda}')
+        # plt.xlabel('Fold')
+        # plt.ylabel('MSE')
+        # plt.legend()
+        # plt.show()
 
-        # grafico mse_train y mse_test en mismo grafico
-        plt.figure()
-        plt.plot(mse_train[i], label='train')
-        plt.plot(mse_test[i], label='test')
-        plt.title(f'MSE for lambda={lmbda}')
-        plt.xlabel('Fold')
-        plt.ylabel('MSE')
-        plt.legend()
-        plt.show()
-
-    return mse_train, mse_test, min_mse_values
+    return mse_train, mse_test
