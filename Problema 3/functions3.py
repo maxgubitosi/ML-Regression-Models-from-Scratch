@@ -200,25 +200,29 @@ class MLP(object):
             print(f"W.shape: {self.weights[0].shape}")
 
 
-    def activation_function(activation_str):
+    def activation_function(self, activation_str):
         if activation_str == 'relu':
             return lambda z : np.maximum(z, 0)
         elif activation_str == 'linear':
             return lambda z : z
         elif activation_str == 'sigmoid':
             return lambda z : 1 / (1 + np.exp(-z))
+        else:
+            print("Invalid activation function")
         
 
-    def deriv_activation_function(activation_str):
+    def deriv_activation_function(self, activation_str):
         if activation_str == 'relu':
             return lambda z : (z > 0).astype(int)
         elif activation_str == 'linear':
             return lambda z : np.ones(z.shape)
         elif activation_str == 'sigmoid':
             return lambda z : z * (1 - z)
+        else:
+            print("Invalid activation function")
 
 
-    def compute_loss(a_out, y):
+    def compute_loss(self, a_out, y):
         return np.mean((a_out - y) ** 2)
 
 
@@ -229,7 +233,7 @@ class MLP(object):
             a_l = np.dot(self.weights[l-1], z[l-1]) + self.biases[l-1]
             a.append(np.copy(a_l))
 
-            h = self.activation_function(a_l, self.activations[l-1])
+            h = self.activation_function(self.activations[l-1])
             z_l = h(a_l)
             z.append(np.copy(z_l))
 
@@ -250,7 +254,7 @@ class MLP(object):
         nabla_w = [np.zeros(w.shape) for w in self.weights]
         nabla_w[-1] = np.dot(d[-1], z[-2].T)
 
-        for l in range(1, self.num_layers):
+        for l in reversed(range(1, len(d))):
             h_deriv = self.deriv_activation_function(self.activations[l-1])
             d[l-1] = np.dot(self.weights[l].T, d[l]) * h_deriv(a[l-1])
             nabla_b[l-1] = d[l-1]
@@ -277,28 +281,28 @@ class MLP(object):
         return total_loss
 
 
-    def evaluate(self, X_test, y_test):
+    def evaluate(self, test_data):
         sum_sq_error = 0
-        for x, y in zip(X_test, y_test):    # CHEQUEAR si no es zip(*X_test, y_test) o algo asi
+        for x, y in test_data:    # CHEQUEAR si no es zip(*X_test, y_test) o algo asi
             pred = self.forward_pass(x)[-1][-1]
             sum_sq_error += self.compute_loss(pred, y)
-        return sum_sq_error / len(X_test)
+        return sum_sq_error / len(test_data)
 
 
-    def fit(self, X_train, y_train, X_test, y_test, mini_batch_size, alpha=0.01, max_epochs=100):
+    def fit(self, training_data, test_data, mini_batch_size, alpha=0.01, max_epochs=100):
         train_losses, test_losses = [], []
-        n_train = len(X_train)
+        n_train = len(training_data)
 
         for epoch in tqdm(range(max_epochs)):
-            random.shuffle(X_train)
-            mini_batches = [X_train[k:k+mini_batch_size] for k in range(0, n_train, mini_batch_size)]
+            random.shuffle(training_data)
+            mini_batches = [training_data[k:k+mini_batch_size] for k in range(0, n_train, mini_batch_size)]
 
             for mini_batch in mini_batches:
                 train_loss = self.update_mini_batch(mini_batch, alpha)
             
             train_losses.append(train_loss)
             
-            test_loss = self.evaluate(X_test, y_test)
+            test_loss = self.evaluate(test_data)
             test_losses.append(test_loss)
 
             if self.debug:
