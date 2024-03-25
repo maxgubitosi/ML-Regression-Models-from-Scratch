@@ -207,6 +207,19 @@ class MLP(object):
             return lambda z : z
         elif activation_str == 'sigmoid':
             return lambda z : 1 / (1 + np.exp(-z))
+        
+
+    def deriv_activation_function(activation_str):
+        if activation_str == 'relu':
+            return lambda z : (z > 0).astype(int)
+        elif activation_str == 'linear':
+            return lambda z : np.ones(z.shape)
+        elif activation_str == 'sigmoid':
+            return lambda z : z * (1 - z)
+
+
+    def compute_loss(a_out, y):
+        return np.mean((a_out - y) ** 2)
 
 
     def forward_pass(self, X):
@@ -227,24 +240,72 @@ class MLP(object):
         return a, z
 
 
-    def backward_pass(self, X, y):
-        pass  # Implement the backward pass method
+    def backward_pass(self, a, z, y):
+        d = [np.zeros(w.shape) for w in self.weights]
+        h_deriv = self.deriv_activation_function(self.activations[-1])
+        d[-1] = (a[-1] - y) * h_deriv(a[-1])
+
+        nabla_b = [np.zeros(b.shape) for b in self.biases]
+        nabla_b[-1] = d[-1]
+        nabla_w = [np.zeros(w.shape) for w in self.weights]
+        nabla_w[-1] = np.dot(d[-1], z[-2].T)
+
+        for l in range(1, self.num_layers):
+            h_deriv = self.deriv_activation_function(self.activations[l-1])
+            d[l-1] = np.dot(self.weights[l].T, d[l]) * h_deriv(a[l-1])
+            nabla_b[l-1] = d[l-1]
+            nabla_w[l-1] = np.dot(d[l-1], z[l-1].T)
+        
+        loss = self.compute_loss(a[-1], y)
+        return loss, nabla_w, nabla_b
 
 
-    def update_weights_and_biases(self, dW, db, alpha):
-        pass  # Implement the weight update method
+    def update_mini_batch(self, mini_batch, alpha):
+        nabla_b = [np.zeros(b.shape) for b in self.biases]
+        nabla_w = [np.zeros(w.shape) for w in self.weights]
+        total_loss = 0
+
+        for x, y in mini_batch:
+            a, z = self.forward_pass(x)
+            loss, d_nabla_w, d_nabla_b = self.backward_pass(a, z, y)
+            nabla_b = [nb + dnb for nb, dnb in zip(nabla_b, d_nabla_b)]
+            nabla_w = [nw + dnw for nw, dnw in zip(nabla_w, d_nabla_w)]
+            total_loss += loss
+
+        self.weights = [w - (alpha / len(mini_batch)) * nw for w, nw in zip(self.weights, nabla_w)]  # CHEQUEAR (ultimas 3 lineas) !!!!!!!!!!!!!!!!!!!! 
+        self.biases = [b - (alpha / len(mini_batch)) * nb for b, nb in zip(self.biases, nabla_b)]
+        return total_loss
 
 
-    def fit(self, X, y, alpha=0.01, max_epoch=100):
-        for epoch in tqdm(range(max_epoch)):
-            # Forward pass
-            A, Z = self.forward_pass(X)
-            # # Backward pass
-            # dW, db = self.backward_pass(X, y)
-            # # Update weights and biases
-            # self.update_weights_and_biases(dW, db, alpha)
+    def evaluate(self, X_test, y_test):
+        sum_sq_error = 0
+        for x, y in zip(X_test, y_test):    # CHEQUEAR si no es zip(*X_test, y_test) o algo asi
+            pred = self.forward_pass(x)[-1][-1]
+            sum_sq_error += self.compute_loss(pred, y)
+        return sum_sq_error / len(X_test)
 
 
+    def fit(self, X_train, y_train, X_test, y_test, mini_batch_size, alpha=0.01, max_epochs=100):
+        train_losses, test_losses = [], []
+        n_train = len(X_train)
+
+        for epoch in tqdm(range(max_epochs)):
+            random.shuffle(X_train)
+            mini_batches = [X_train[k:k+mini_batch_size] for k in range(0, n_train, mini_batch_size)]
+
+            for mini_batch in mini_batches:
+                train_loss = self.update_mini_batch(mini_batch, alpha)
+            
+            train_losses.append(train_loss)
+            
+            test_loss = self.evaluate(X_test, y_test)
+            test_losses.append(test_loss)
+
+            if self.debug:
+                print(f"Epoch {epoch}: Train loss: {train_loss}, Test loss: {test_loss}")
+            
+        return train_losses, test_losses
+            
 
     def predict(self, X):
         pass  # Implement the prediction method
