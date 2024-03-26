@@ -227,9 +227,10 @@ class MLP(object):
         return np.mean((a_out - y) ** 2)
 
 
-    def forward_pass(self, X):
+    def forward_pass(self, X, verbose=False):
         z = [np.array(X).reshape(-1, 1)]
         a = []
+        last_activation = None
         for l in range(1, self.num_layers):
             a_l = np.dot(self.weights[l-1], z[l-1]) + self.biases[l-1]
             a.append(np.copy(a_l))
@@ -239,7 +240,7 @@ class MLP(object):
                 h = self.activation_function(self.activations[l-1])
                 z_l = h(a_l)
             else:
-                if self.verbose:
+                if self.verbose or verbose:
                     print(f"No activation function specified for  layer: {l}")
                 # If no activation function is specified, use linear activation
                 z_l = a_l
@@ -248,9 +249,12 @@ class MLP(object):
 
             z.append(np.copy(z_l))
 
-        # if self.verbose:
-            # print(f"z.shape: {z[0].shape}", end=" ")
-            # print(f"a.shape: {a[0].shape}", end=" ")
+            if z_l.shape != last_activation:
+                if self.verbose or verbose:
+                    print(f"Layer {l}:")
+                    print(f"  a[{l}]:\n  {a_l[:3]} ... {a_l[-3:]}")
+                    print(f"  z[{l}]:\n  {z_l[:3]} ... {z_l[-3:]}")
+                last_activation = z_l.shape  # Actualizar la última activación impresa
 
         return a, z
 
@@ -321,14 +325,15 @@ class MLP(object):
             
         return train_losses, test_losses
     
-    def predict(self, X):
+
+    def predict(self, X, verbose=False):
         X = X.values                            # con esto anda (REVISAR)
-        if self.verbose:
+        if self.verbose or verbose:
             print(f"X.shape: {X.shape}")
             print("X: \n", X)
         predictions = []
         for x in X:
-            a, z = self.forward_pass(x.reshape(-1, 1))
+            a, z = self.forward_pass(x.reshape(-1, 1), verbose=verbose)
             pred = z[-1][-1].flatten()
             predictions.append(pred)
 
