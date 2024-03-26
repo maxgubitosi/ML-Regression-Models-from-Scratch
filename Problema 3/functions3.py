@@ -239,6 +239,8 @@ class MLP(object):
                 h = self.activation_function(self.activations[l-1])
                 z_l = h(a_l)
             else:
+                if self.verbose:
+                    print(f"No activation function specified for  layer: {l}")
                 # If no activation function is specified, use linear activation
                 z_l = a_l
                 # # If no activation function is specified, use relu activation
