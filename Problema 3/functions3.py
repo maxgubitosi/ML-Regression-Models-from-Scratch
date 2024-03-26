@@ -182,12 +182,13 @@ def one_hot_encoding(df, column):
 
 class MLP(object):
 
-    def __init__(self, layers=[1, 30, 1], activations=['relu', 'linear'], seed=42, debug=False):
-        self.debug = debug
+    def __init__(self, input_size, layers=[6, 30, 1], activations=['relu', 'linear'], seed=42, verbose=False):
+        self.verbose = verbose
         self.seed = seed
-        self.layers = layers
+        self.input_size = input_size
+        self.layers = [input_size] + layers  # Include input layer size
         self.activations = activations
-        self.num_layers = len(layers)
+        self.num_layers = len(self.layers)
         self.set_weights_and_biases()
 
 
@@ -195,7 +196,7 @@ class MLP(object):
         np.random.seed(self.seed)
         self.biases = [np.random.randn(y, 1) for y in self.layers[1:]]
         self.weights = [np.random.randn(y, x) for x, y in zip(self.layers[:-1], self.layers[1:])]
-        if self.debug:
+        if self.verbose:
             print(f"b.shape: {self.biases[0].shape}")
             print(f"W.shape: {self.weights[0].shape}")
 
@@ -233,13 +234,21 @@ class MLP(object):
             a_l = np.dot(self.weights[l-1], z[l-1]) + self.biases[l-1]
             a.append(np.copy(a_l))
 
-            h = self.activation_function(self.activations[l-1])
-            z_l = h(a_l)
+            # Check if the current layer has an associated activation function
+            if l < len(self.activations):
+                h = self.activation_function(self.activations[l-1])
+                z_l = h(a_l)
+            else:
+                # If no activation function is specified, use linear activation
+                z_l = a_l
+                # # If no activation function is specified, use relu activation
+                # z_l = np.maximum(a_l, 0)
+
             z.append(np.copy(z_l))
 
-        if self.debug:
-            print(f"z.shape: {z.shape}")
-            print(f"a.shape: {a.shape}")
+        # if self.verbose:
+            # print(f"z.shape: {z[0].shape}", end=" ")
+            # print(f"a.shape: {a[0].shape}", end=" ")
 
         return a, z
 
@@ -276,15 +285,15 @@ class MLP(object):
             nabla_w = [nw + dnw for nw, dnw in zip(nabla_w, d_nabla_w)]
             total_loss += loss
 
-        self.weights = [w - (alpha / len(mini_batch)) * nw for w, nw in zip(self.weights, nabla_w)]  # CHEQUEAR (ultimas 3 lineas) !!!!!!!!!!!!!!!!!!!! 
+        self.weights = [w - (alpha / len(mini_batch)) * nw for w, nw in zip(self.weights, nabla_w)]
         self.biases = [b - (alpha / len(mini_batch)) * nb for b, nb in zip(self.biases, nabla_b)]
         return total_loss
 
 
     def evaluate(self, test_data):
         sum_sq_error = 0
-        for x, y in test_data:    # CHEQUEAR si no es zip(*X_test, y_test) o algo asi
-            pred = self.forward_pass(x)[-1][-1]
+        for x, y in test_data:
+            pred = self.forward_pass(x)[-1][-1].flatten()
             sum_sq_error += self.compute_loss(pred, y)
         return sum_sq_error / len(test_data)
 
@@ -305,11 +314,20 @@ class MLP(object):
             test_loss = self.evaluate(test_data)
             test_losses.append(test_loss)
 
-            if self.debug:
+            if self.verbose:
                 print(f"Epoch {epoch}: Train loss: {train_loss}, Test loss: {test_loss}")
             
         return train_losses, test_losses
-            
-
+    
     def predict(self, X):
-        pass  # Implement the prediction method
+        X = X.values                            # con esto anda (REVISAR)
+        if self.verbose:
+            print(f"X.shape: {X.shape}")
+            print("X: \n", X)
+        predictions = []
+        for x in X:
+            a, z = self.forward_pass(x.reshape(-1, 1))
+            pred = z[-1][-1].flatten()
+            predictions.append(pred)
+
+        return np.array(predictions)
