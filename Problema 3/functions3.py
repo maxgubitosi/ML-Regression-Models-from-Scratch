@@ -182,14 +182,20 @@ def one_hot_encoding(df, column):
 
 class MLP(object):
 
-    def __init__(self, input_size, layers=[6, 30, 1], activations=['relu', 'linear'], seed=42, verbose=False):
+    def __init__(self, input_size, layers=[6, 30, 1], activations='default', seed=42, verbose=False):
         self.verbose = verbose
         self.seed = seed
         self.input_size = input_size
-        self.layers = [input_size] + layers  # Include input layer size
-        self.activations = activations
+        self.layers = layers  # Include input layer size
         self.num_layers = len(self.layers)
+        if activations == 'default':
+            self.activations = ['relu'] * (self.num_layers - 1) + ['linear']
+        else: self.activations = activations
+        self.check_compatability()
         self.set_weights_and_biases()
+
+    def check_compatability(self):
+        assert len(self.activations) == self.num_layers, 'Debe haber una función de activación por capa'
 
 
     def set_weights_and_biases(self):
@@ -227,10 +233,9 @@ class MLP(object):
         return np.mean((a_out - y) ** 2)
 
 
-    def forward_pass(self, X, verbose=False):
+    def forward_pass(self, X):
         z = [np.array(X).reshape(-1, 1)]
         a = []
-        last_activation = None
         for l in range(1, self.num_layers):
             a_l = np.dot(self.weights[l-1], z[l-1]) + self.biases[l-1]
             a.append(np.copy(a_l))
@@ -240,8 +245,6 @@ class MLP(object):
                 h = self.activation_function(self.activations[l-1])
                 z_l = h(a_l)
             else:
-                if self.verbose or verbose:
-                    print(f"No activation function specified for  layer: {l}")
                 # If no activation function is specified, use linear activation
                 z_l = a_l
                 # # If no activation function is specified, use relu activation
@@ -249,12 +252,9 @@ class MLP(object):
 
             z.append(np.copy(z_l))
 
-            if z_l.shape != last_activation:
-                if self.verbose or verbose:
-                    print(f"Layer {l}:")
-                    print(f"  a[{l}]:\n  {a_l[:3]} ... {a_l[-3:]}")
-                    print(f"  z[{l}]:\n  {z_l[:3]} ... {z_l[-3:]}")
-                last_activation = z_l.shape  # Actualizar la última activación impresa
+        if self.verbose:
+            print(f"z.shape: {z[0].shape}", end=" ")
+            print(f"a.shape: {a[0].shape}", end=" ")
 
         return a, z
 
@@ -296,6 +296,14 @@ class MLP(object):
         return total_loss
 
 
+    def update_single_example(self, x, y, alpha):
+        a, z = self.forward_pass(x)
+        loss, nabla_w, nabla_b = self.backward_pass(a, z, y)
+        self.weights = [w - alpha * nw for w, nw in zip(self.weights, nabla_w)]
+        self.biases = [b - alpha * nb for b, nb in zip(self.biases, nabla_b)]
+        return loss
+
+
     def evaluate(self, test_data):
         sum_sq_error = 0
         for x, y in test_data:
@@ -304,36 +312,53 @@ class MLP(object):
         return sum_sq_error / len(test_data)
 
 
-    def fit(self, training_data, test_data, mini_batch_size, alpha=0.01, max_epochs=100):
-        train_losses, test_losses = [], []
-        n_train = len(training_data)
+    def fit(self, training_data, test_data, mini_batch_size, alpha=0.01, max_epochs=100, update_rule='mini_batch'):
+        if update_rule == 'mini_batch':
+            train_losses, test_losses = [], []
+            n_train = len(training_data)
 
-        for epoch in tqdm(range(max_epochs)):
-            random.shuffle(training_data)
-            mini_batches = [training_data[k:k+mini_batch_size] for k in range(0, n_train, mini_batch_size)]
+            for epoch in tqdm(range(max_epochs)):
+                random.shuffle(training_data)
+                mini_batches = [training_data[k:k+mini_batch_size] for k in range(0, n_train, mini_batch_size)]
 
-            for mini_batch in mini_batches:
-                train_loss = self.update_mini_batch(mini_batch, alpha)
-            
-            train_losses.append(train_loss)
-            
-            test_loss = self.evaluate(test_data)
-            test_losses.append(test_loss)
+                for mini_batch in mini_batches:
+                    train_loss = self.update_mini_batch(mini_batch, alpha)
+                
+                train_losses.append(train_loss)
+    
+                test_loss = self.evaluate(test_data)
+                test_losses.append(test_loss)
 
-            if self.verbose:
-                print(f"Epoch {epoch}: Train loss: {train_loss}, Test loss: {test_loss}")
-            
-        return train_losses, test_losses
+                if self.verbose:
+                    print(f"Epoch {epoch}: Train loss: {train_loss}, Test loss: {test_loss}")
+
+            return train_losses, test_losses
+        
+        elif update_rule == 'single_example':
+            train_losses, test_losses = [], []
+
+            for epoch in tqdm(range(max_epochs)):
+                random.shuffle(training_data)
+
+                for x, y in training_data:
+                    train_loss = self.update_single_example(x, y, alpha)
+                
+                train_losses.append(train_loss)
+                
+                test_loss = self.evaluate(test_data)
+                test_losses.append(test_loss)
+
+                if self.verbose:
+                    print(f"Epoch {epoch}: Train loss: {train_loss}, Test loss: {test_loss}")
+                
+            return train_losses, test_losses
     
 
-    def predict(self, X, verbose=False):
-        X = X.values                            # con esto anda (REVISAR)
-        if self.verbose or verbose:
-            print(f"X.shape: {X.shape}")
-            print("X: \n", X)
+    def predict(self, X):
+        X = X.values
         predictions = []
         for x in X:
-            a, z = self.forward_pass(x.reshape(-1, 1), verbose=verbose)
+            a, z = self.forward_pass(x.reshape(-1, 1))
             pred = z[-1][-1].flatten()
             predictions.append(pred)
 
