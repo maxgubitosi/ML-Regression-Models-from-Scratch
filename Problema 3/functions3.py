@@ -189,7 +189,7 @@ class MLP(object):
         self.layers = layers  # Include input layer size
         self.num_layers = len(self.layers)
         if activations == 'default':
-            self.activations = ['relu'] * (self.num_layers - 1) + ['linear']
+            self.activations = ['relu'] * (self.num_layers -1) + ['linear']
         else: self.activations = activations
         self.check_compatability()
         self.set_weights_and_biases()
