@@ -22,70 +22,84 @@ def train_test_split(df, test_size=0.2, seed=42):
     return train_df, test_df
 
 
-def fit_linear_regression(X, y, M, verbose=False):
-    """
-    Fits a polynomial regression model of degree M to the data
-        Phi: matrix initialized with ones in the first column and polynomial features in the following columns
-    Inputs:
-        - X (np.array): input data                                    CHEQUEAR
-        - y (np.array): target data                                   CHEQUEAR
-        - M: degree of the polynomial
-    Outputs:
-        - W (np.array): weights of the polynomial regression model
-    """
-    # Generate polynomial features
-    Phi = np.ones((X.shape[0], 1)) 
-    for i in range(1, M+1):
-        Phi = np.c_[Phi, X**i]
+class PolynomialRegression:
 
-    # Compute weights using the normal equation
-    W = np.linalg.inv(Phi.T @ Phi) @ Phi.T @ y
+    def __init__(self, M, lmbda=0, verbose=False):
+        self.M = M
+        self.lmbda = lmbda
+        self.verbose = verbose
+        self.W = None
+        
+
+    def fit_linear_regression(self, X, y):
+            
+        """
+        Fits a polynomial regression model of degree M to the data
+            Phi: matrix initialized with ones in the first column and polynomial features in the following columns
+        Inputs:
+            - X (np.array): input data                                    CHEQUEAR
+            - y (np.array): target data                                   CHEQUEAR
+            - M: degree of the polynomial
+        Outputs:
+            - W (np.array): weights of the polynomial regression model
+        """
+        # Generate polynomial features
+        Phi = np.ones((X.shape[0], 1)) 
+        for i in range(1, self.M+1):
+            Phi = np.c_[Phi, X**i]
+
+        # Compute weights using the normal equation
+        W = np.linalg.inv(Phi.T @ Phi) @ Phi.T @ y
+        self.W = W
+        
+        if self.verbose:
+            print(f'Phi shape: {Phi.shape}')
+            print(f'W shape: {W.shape}')
+            print(f'Phi: {Phi}')
+            print(f'W: {W}')
+        
+        return W
+        
+
+    def predict(self, X):
+        """
+        Predicts the output of a linear regression model
+        Inputs:
+            - X (np.array): input data
+            - w (np.array): weights of the model
+        Outputs:
+            - y_pred (np.array): predicted output
+        """
+        poly = np.polynomial.polynomial.Polynomial(self.W)   
+        return poly(X)
     
-    if verbose:
-        print(f'Phi shape: {Phi.shape}')
-        print(f'W shape: {W.shape}')
-        print(f'Phi: {Phi}')
-        print(f'W: {W}')
     
-    return W
+    def fit_ridge(self, X, y):
+        """
+        Fits a polynomial ridge regression model of degree M to the data
+        Inputs:
+            - X (np.array): input data
+            - y (np.array): target data
+            - M: degree of the polynomial
+            - lmbda: regularization parameter
+        Outputs:
+            - W (np.array): weights of the polynomial ridge regression model
+        """
+        # Generate polynomial features
+        Phi = np.ones((X.shape[0], 1)) 
+        for i in range(1, self.M+1):
+            Phi = np.c_[Phi, X**i]
+        
+        # Compute weights using the normal equation
+        W = np.linalg.inv(Phi.T @ Phi + self.lmbda * np.eye(self.M+1)) @ Phi.T @ y
 
+        if self.verbose:
+            print(f'Phi shape: {Phi.shape}')
+            print(f'W shape: {W.shape}')
+            print(f'Phi: {Phi}')
+            print(f'W: {W}')
+        
+        self.W = W
+        return W
 
-def predict_linear_regression(X, w):
-    """
-    Predicts the output of a linear regression model
-    Inputs:
-        - X (np.array): input data
-        - w (np.array): weights of the model
-    Outputs:
-        - y_pred (np.array): predicted output
-    """
-    poly = np.polynomial.polynomial.Polynomial(w)   
-    return poly(X)
-
-
-def fit_ridge_regression(X, y, M, lmbda, verbose=False):
-    """
-    Fits a polynomial ridge regression model of degree M to the data
-    Inputs:
-        - X (np.array): input data
-        - y (np.array): target data
-        - M: degree of the polynomial
-        - lmbda: regularization parameter
-    Outputs:
-        - W (np.array): weights of the polynomial ridge regression model
-    """
-    # Generate polynomial features
-    Phi = np.ones((X.shape[0], 1)) 
-    for i in range(1, M+1):
-        Phi = np.c_[Phi, X**i]
-    
-    # Compute weights using the normal equation
-    W = np.linalg.inv(Phi.T @ Phi + lmbda * np.eye(M+1)) @ Phi.T @ y
-
-    if verbose:
-        print(f'Phi shape: {Phi.shape}')
-        print(f'W shape: {W.shape}')
-        print(f'Phi: {Phi}')
-        print(f'W: {W}')
-    
-    return W
+        
