@@ -47,7 +47,7 @@ def fit_ridge_regression(X, y, lmbda):
     X = np.hstack((np.ones((X.shape[0], 1)), X))
     # Generate polynomial features
     I = np.eye(X.shape[1])  # Identity matrix
-    W = np.linalg.inv(X.T @ X + lmbda * I) @ X.T @ y
+    W = np.linalg.inv(X.T @ X + lmbda * I) @ X.T @ y       # CHequear si no hay que hacer los Phi
     return W
 
 
@@ -62,9 +62,14 @@ def cross_validation_ridge(X, y, lmbdas, k=10, seed=42):
     mse_test = np.zeros((len(lmbdas), k))
     
     for i, lmbda in enumerate(lmbdas):
-        idx = np.random.permutation(n)
+        # idx = np.random.permutation(n)
+        idx = np.arange(n)                                  # pruebo sin permutar
         X_shuffled = X.iloc[idx]  
         y_shuffled = y[idx]
+
+        print(f'x_shuffled[{i}.shape] = {X_shuffled.shape}')
+        print(f'y_shuffled[{i}.shape] = {y_shuffled.shape}')
+        
         for j in range(k):
             X_train = np.concatenate([X_shuffled[:j*(n//k)], X_shuffled[(j+1)*(n//k):]])
             y_train = np.concatenate([y_shuffled[:j*(n//k)], y_shuffled[(j+1)*(n//k):]])
