@@ -35,7 +35,7 @@ class MLP(object):
         self.verbose = verbose
         self.seed = seed
         self.input_size = input_size
-        self.layers = layers  # Include input layer size
+        self.layers = layers  
         self.num_layers = len(self.layers)
         if activations == 'default':
             self.activations = ['relu'] * (self.num_layers -1) + ['linear']
@@ -248,7 +248,7 @@ class MLP(object):
             n_train = len(training_data)
 
             for epoch in tqdm(range(max_epochs)):
-                random.shuffle(training_data)
+                # random.shuffle(training_data)
                 mini_batches = [training_data[k:k+mini_batch_size] for k in range(0, n_train, mini_batch_size)]
 
                 for mini_batch in mini_batches:
@@ -268,7 +268,7 @@ class MLP(object):
             train_losses, test_losses = [], []
 
             for epoch in tqdm(range(max_epochs)):
-                random.shuffle(training_data)
+                # random.shuffle(training_data)
 
                 for x, y in training_data:
                     train_loss = self.update_single_example(x, y, alpha)
@@ -293,3 +293,29 @@ class MLP(object):
             predictions.append(pred)
 
         return np.array(predictions)
+    
+
+def k_folds_plot(X, y, k=10, layers=[6, 30, 1]):
+    n = X.shape[0]
+
+    for j in range(k):
+        X_train = np.concatenate([X[:j*(n//k)], X[(j+1)*(n//k):]])
+        y_train = np.concatenate([y[:j*(n//k)], y[(j+1)*(n//k):]])
+        X_test = X[j*(n//k):(j+1)*(n//k)]
+        y_test = y[j*(n//k):(j+1)*(n//k)]
+        
+        lr_model = MLP(input_size=X_train.shape[1], layers=layers)
+        W = lr_model.fit(X_train, y_train)
+        y_test_pred = lr_model.predict(X_test)
+        mse_test = np.mean((y_test - y_test_pred)**2)
+
+        # plot y_test vs y_test_pred
+        plt.figure()
+        plt.scatter(y_test, y_test_pred)
+        plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], color='red', linestyle='--')
+        plt.title(f'Fold {j+1} Test Predictions')
+        plt.xlabel('y_test')
+        plt.ylabel('y_test_pred')
+        plt.show()
+
+        print(f'MSE for fold {j+1}: {mse_test}')

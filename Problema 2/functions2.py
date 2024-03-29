@@ -57,7 +57,7 @@ def cross_validation_ridge(X, y, lmbdas, k=10, seed=42):
     n = X.shape[0]
     mse_train = np.zeros((len(lmbdas), k))
     mse_test = np.zeros((len(lmbdas), k))
-    
+
     for i, lmbda in enumerate(lmbdas):
         # idx = np.random.permutation(n)
         idx = np.arange(n)                                  # pruebo sin permutar
@@ -80,16 +80,6 @@ def cross_validation_ridge(X, y, lmbdas, k=10, seed=42):
             
             mse_train[i, j] = mse(y_train, y_train_pred)
             mse_test[i, j] = mse(y_test, y_test_pred)
-
-        # # grafico mse_train y mse_test en mismo grafico
-        # plt.figure()
-        # plt.plot(mse_train[i], label='train')
-        # plt.plot(mse_test[i], label='test')
-        # plt.title(f'MSE for lambda={lmbda}')
-        # plt.xlabel('Fold')
-        # plt.ylabel('MSE')
-        # plt.legend()
-        # plt.show()
 
     return mse_train, mse_test
 
@@ -128,3 +118,29 @@ class LinearRegression:
         """
         X = np.hstack((np.ones((X.shape[0], 1)), X))
         return X @ self.W
+    
+
+def k_folds_plot(lmbda, X, y, k=10):
+    n = X.shape[0]
+
+    for j in range(k):
+        X_train = np.concatenate([X[:j*(n//k)], X[(j+1)*(n//k):]])
+        y_train = np.concatenate([y[:j*(n//k)], y[(j+1)*(n//k):]])
+        X_test = X[j*(n//k):(j+1)*(n//k)]
+        y_test = y[j*(n//k):(j+1)*(n//k)]
+        
+        lr_model = LinearRegression(lmbda)
+        W = lr_model.fit(X_train, y_train)
+        y_test_pred = lr_model.predict(X_test)
+        mse_test = mse(y_test, y_test_pred)
+
+        # plot y_test vs y_test_pred
+        plt.figure()
+        plt.scatter(y_test, y_test_pred)
+        plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], color='red', linestyle='--')
+        plt.title(f'Fold {j+1} Test Predictions')
+        plt.xlabel('y_test')
+        plt.ylabel('y_test_pred')
+        plt.show()
+
+        print(f'MSE for fold {j+1}: {mse_test}')
