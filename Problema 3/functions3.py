@@ -6,7 +6,16 @@ from tqdm import tqdm
 
 
 def train_test_split(df, test_size=0.2, seed=42):
-    # shuffle dataset con una semilla fija
+    """
+        Returns a shuffled dataset split into train and test sets
+        Inputs:
+            - df (pd.dataframe): contains the dataset
+            - test_size (float): train/test split, default: 0.2/0.8      
+            - seed (int): seed for the random number generator, default: 42
+        Outputs:
+            - train_df (pd.dataframe): training set
+            - test_df (pd.dataframe): test set 
+        """
     df = df.sample(frac=1, random_state=seed).reset_index(drop=True)     
     train_size = int(df.shape[0] * (1 - test_size))
     train_df = df.iloc[:train_size].reset_index(drop=True)
@@ -19,166 +28,6 @@ def one_hot_encoding(df, column):
     df = df.drop(column, axis=1)
     return df
 
-
-# def set_weights_and_biases(l=[1, 6, 1], activations=['relu', 'linear'], seed=42 ):
-#     """
-#     input:
-#         L: profundidad de la red (cantidad de capas ocultas)
-#         M^l: cantidad de unidades ocultas en la capa l 
-#     """
-#     # check consistency of the input
-#     L = len(l)
-#     assert len(activations) + 1 == L, 'Debe haber una función de activación por capa'
-
-#     np.random.seed(seed)
-#     # initialize weights and biases
-#     W, b = {}, {}
-#     b = {i: np.random.randn(j, 1) for i, j in enumerate(l[1:], start=1)}
-#     W = {i: np.random.randn(y, x) for i, (x, y) in enumerate(zip(l[:-1], l[1:]), start=1)}
-
-#     # prints para debug
-#     print(f"b.shape: {b[1].shape}")
-#     print(f"W.shape: {W[1].shape}")
-
-#     print(f"b: {b}")
-#     print(f"W: {W}")
-#     return W, b
-
-
-# def activation_function(z, activation):
-#     if activation == 'relu':
-#         return np.maximum(z, 0)
-#     elif activation == 'linear':
-#         return z
-#     elif activation == 'sigmoid':
-#         return 1 / (1 + np.exp(-z))
-
-# def compute_loss(A_out, y):
-#     return np.mean((A_out - y) ** 2)
-
-
-# def forward_pass(X, W, b, L, activations=['relu', 'linear']):
-#     """
-#     input:
-#         X: matriz de diseño
-#         W: pesos de la red
-#         b: sesgos de la red
-#         L: profundidad de la red (cantidad de capas ocultas)
-#         activations: lista con las funciones de activación de cada capa
-#     """
-#     # # L = len(W) + 1                                                      # CHEQUEAR
-
-#     # # initialize the list to store the activations
-#     # A = [X]
-#     # Z = []
-#     # for i in range(1, L):  # Corrección en el rango de la iteración
-#     #     Z.append(A[i-1] @ W[i] + b[i])  # Añadir las salidas de la capa oculta
-#     #     A.append(activation_function(Z[i-1], activations[i-1]))  # Añadir las activaciones
-#     # return A, Z
-
-#     z = [np.array(X).reshape(-1, 1)]
-#     a = [z[0] for _ in range(L)]  # Inicializa 'a' con la misma forma que 'z'
-#     for i in range(1, L):
-#         z.append(np.dot(W[i], a[i-1]) + b[i])
-#         a[i] = activation_function(z[i], activations[i-1])
-#     return a, z
-
-# def backward_pass(X, y, W, b, A, Z, L, activations=['relu', 'linear']):
-#     """
-#     input:
-#         X: matriz de diseño
-#         y: vector de etiquetas
-#         W: pesos de la red
-#         b: sesgos de la red
-#         A: diccionario con las activaciones
-#         Z: diccionario con las salidas de las capas ocultas
-#         L: profundidad de la red (cantidad de capas ocultas)
-#         activations: lista con las funciones de activación de cada capa
-#     """
-#     # L = len(W) + 1                                                      # CHEQUEAR
-
-#     # initialize the dictionary to store the gradients
-#     dW, db = {}, {}
-#     dZ = {}
-
-#     dA = {L-1: -2 * (y - A[L-1])}
-#     for i in range(L-1, 0, -1):
-#         if activations[i-1] == 'relu':
-#             dZ[i] = dA[i] * (Z[i] > 0)
-#         elif activations[i-1] == 'linear':
-#             dZ[i] = dA[i]
-#         elif activations[i-1] == 'sigmoid':
-#             dZ[i] = dA[i] * A[i] * (1 - A[i])
-
-#         dW[i] = A[i-1].T @ dZ[i]
-#         db[i] = np.sum(dZ[i], axis=0)
-#         dA[i-1] = dZ[i] @ W[i].T
-
-#     return dW, db
-
-
-# def update_weights_and_biases(W, b, dW, db, alpha=0.01):
-#     """
-#     input:
-#         W: pesos de la red
-#         b: sesgos de la red
-#         dW: gradientes de los pesos
-#         db: gradientes de los sesgos
-#         alpha: learning rate
-#     """
-#     for i in W.keys():
-#         W[i] -= alpha * dW[i]
-#         b[i] -= alpha * db[i]
-#     return W, b
-
-
-# def fit_nn(X, y, l=[1, 3, 1], activations=['relu', 'linear'], alpha=0.01, max_epoch=1000, seed=42):
-#     """
-#     input:
-#         X: matriz de diseño
-#         y: vector de etiquetas
-#         L: profundidad de la red (cantidad de capas ocultas)
-#         M^l: cantidad de unidades ocultas en la capa l 
-#         activations: lista con las funciones de activación de cada capa
-#         alpha: learning rate
-#         max_epoch: cantidad máxima de iteraciones
-#     """
-#     L = len(l)
-#     # initialize weights and biases
-#     W, b = set_weights_and_biases(l, activations, seed)
-#     for epoch in tqdm(range(max_epoch)):
-#         # forward pass
-#         A, Z = forward_pass(X, W, b, L, activations)
-#         # backward pass
-#         dW, db = backward_pass(X, y, W, b, A, Z, L, activations)
-#         # update weights and biases
-#         W, b = update_weights_and_biases(W, b, dW, db, alpha)
-#     return W, b
-
-# def predict_nn(X, W, b, activations=['relu', 'linear']):
-#     """
-#     input:
-#         X: matriz de diseño
-#         W: pesos de la red
-#         b: sesgos de la red
-#         activations: lista con las funciones de activación de cada capa
-#     """
-#     L = len(W) + 1
-#     A, Z = forward_pass(X, W, b, L, activations)
-#     return A[L-1]
-
-
-# class MLP(object):
-#     def __init__(self, layers=[1, 3, 1], activations=['relu', 'linear']):
-#         self.layers = layers
-#         self.activations = activations
-#         self.num_layers = len(layers)
-
-#         self.biases = [np.random.randn(y,1) for y in layers[1:]]
-#         self.weights = [np.random.randn(y,x) for x,y in zip(layers[:-1], layers[1:])]
-
-
-# ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 class MLP(object):
 
@@ -199,6 +48,9 @@ class MLP(object):
 
 
     def set_weights_and_biases(self):
+        """
+        Initialize weights and biases randomly
+        """
         np.random.seed(self.seed)
         self.biases = [np.random.randn(y, 1) for y in self.layers[1:]]
         self.weights = [np.random.randn(y, x) for x, y in zip(self.layers[:-1], self.layers[1:])]
@@ -208,6 +60,14 @@ class MLP(object):
 
 
     def activation_function(self, activation_str):
+        """
+        Returns the activation function given its name
+        
+        Inputs:
+            - activation_str (str): name of the activation function
+        Outputs:
+            - lambda function: activation function
+        """
         if activation_str == 'relu':
             return lambda z : np.maximum(z, 0)
         elif activation_str == 'linear':
@@ -219,6 +79,14 @@ class MLP(object):
         
 
     def deriv_activation_function(self, activation_str):
+        """
+        Returns the derivative of the activation function given its name
+
+        Inputs:
+            - activation_str (str): name of the activation function
+        Outputs:
+            - lambda function: derivative of the activation function
+        """
         if activation_str == 'relu':
             return lambda z : (z > 0).astype(int)
         elif activation_str == 'linear':
@@ -234,6 +102,15 @@ class MLP(object):
 
 
     def forward_pass(self, X):
+        """
+        Forward pass through the network
+        
+        Inputs:
+            - X (np.array): input data
+        Outputs:
+            - a (list): list of activations
+            - z (list): list of weighted inputs
+        """
         z = [np.array(X).reshape(-1, 1)]
         a = []
         for l in range(1, self.num_layers):
@@ -260,6 +137,18 @@ class MLP(object):
 
 
     def backward_pass(self, a, z, y):
+        """
+        Backward pass through the network
+
+        Inputs:
+            - a (list): list of activations
+            - z (list): list of weighted inputs
+            - y (np.array): target data
+        Outputs:
+            - loss (float): loss of the network
+            - nabla_w (list): list of gradients of the weights
+            - nabla_b (list): list of gradients of the biases
+        """ 
         d = [np.zeros(w.shape) for w in self.weights]
         h_deriv = self.deriv_activation_function(self.activations[-1])
         d[-1] = (a[-1] - y) * h_deriv(a[-1])
@@ -280,6 +169,15 @@ class MLP(object):
 
 
     def update_mini_batch(self, mini_batch, alpha):
+        """
+        Update weights and biases using mini-batch gradient descent
+        
+        Inputs:
+            - mini_batch (list): list of mini-batches
+            - alpha (float): learning rate
+            Outputs:
+            - total_loss (float): total loss of the mini-batch
+        """
         nabla_b = [np.zeros(b.shape) for b in self.biases]
         nabla_w = [np.zeros(w.shape) for w in self.weights]
         total_loss = 0
@@ -297,6 +195,16 @@ class MLP(object):
 
 
     def update_single_example(self, x, y, alpha):
+        """
+        Update weights and biases using single example gradient descent
+        
+        Inputs:
+            - x (np.array): input data
+            - y (np.array): target data
+            - alpha (float): learning rate
+            Outputs:
+            - loss (float): loss of the single example
+        """
         a, z = self.forward_pass(x)
         loss, nabla_w, nabla_b = self.backward_pass(a, z, y)
         self.weights = [w - alpha * nw for w, nw in zip(self.weights, nabla_w)]
@@ -305,6 +213,14 @@ class MLP(object):
 
 
     def evaluate(self, test_data):
+        """
+        Evaluate the network on test data
+
+        Inputs:
+            - test_data (list): list of test data
+        Outputs:
+            - sum_sq_error (float): mean squared error of the test data
+        """
         sum_sq_error = 0
         for x, y in test_data:
             pred = self.forward_pass(x)[-1][-1].flatten()
@@ -313,6 +229,20 @@ class MLP(object):
 
 
     def fit(self, training_data, test_data, mini_batch_size, alpha=0.01, max_epochs=100, update_rule='mini_batch'):
+        """
+        Fit the model to the training data
+
+        Inputs:
+            - training_data (list): list of training data
+            - test_data (list): list of test data
+            - mini_batch_size (int): size of the mini-batches
+            - alpha (float): learning rate
+            - max_epochs (int): maximum number of epochs
+            - update_rule (str): update rule for the network
+        Outputs:
+            - train_losses (list): list of training losses
+            - test_losses (list): list of test losses
+        """
         if update_rule == 'mini_batch':
             train_losses, test_losses = [], []
             n_train = len(training_data)
