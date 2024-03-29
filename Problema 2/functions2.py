@@ -60,7 +60,7 @@ def cross_validation_ridge(X, y, lmbdas, k=10, seed=42):
 
     for i, lmbda in enumerate(lmbdas):
         # idx = np.random.permutation(n)
-        idx = np.arange(n)                                  # pruebo sin permutar
+        idx = np.arange(n)                                  # without shuffling
         X_shuffled = X.iloc[idx]  
         y_shuffled = y[idx]
 
