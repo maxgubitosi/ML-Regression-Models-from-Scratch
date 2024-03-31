@@ -1,4 +1,4 @@
-# Informe del Trabajo Práctico de Machine Learning
+# Trabajo Práctico Nº2 de Machine Learning
 
 En este informe se presenta el desarrollo de un trabajo práctico de Machine Learning, donde se implementan modelos de IA desde cero, sin utilizar librerías como TensorFlow, PyTorch o Scikit-learn. En su lugar, se emplean únicamente herramientas como NumPy, Pandas, Matplotlib y Tqdm.
 
