@@ -19,6 +19,3 @@ En este ejercicio, se utiliza el mismo dataset que en el ejercicio 2. Se desarro
 ## Conclusiones
 
 A lo largo de este trabajo práctico, se han implementado modelos de IA desde cero, sin depender de librerías especializadas como TensorFlow o PyTorch. En su lugar, se han utilizado herramientas básicas como NumPy, Pandas, Matplotlib y Tqdm. Esta aproximación ha permitido un entendimiento más profundo de los algoritmos de Machine Learning y su aplicación en problemas del mundo real.
-
----
-*Este informe ha sido preparado siguiendo buenas prácticas de programación y Machine Learning, con un enfoque académico y riguroso.*
