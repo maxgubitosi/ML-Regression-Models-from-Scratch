@@ -48,18 +48,12 @@ Using the same dataset from problem 2, this problem involves implementing a full
 
 ### Polynomial Regression Results
 
-**(Include visual results and analysis here, such as error curves, validation vs training errors, etc.)**
-
-![Polynomial Regression](path/to/your/image.png)
+![Polynomial Regression](1.png)
 
 ### Ridge Linear Regression Results
 
-**(Include visual results and analysis here, such as the comparison of model performance with different regularization parameters.)**
-
-![Ridge Regression](path/to/your/image.png)
+![Ridge Regression](2.png)
 
 ### Fully Connected Neural Network Results
 
-**(Include visual results and analysis here, showing the performance of the neural network across different configurations.)**
-
-![Neural Network Performance](path/to/your/image.png)
+![Neural Network Performance](3.png)
