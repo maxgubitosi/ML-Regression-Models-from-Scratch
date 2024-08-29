@@ -1,21 +1,65 @@
-# Trabajo Práctico Nº2 de Machine Learning
+# ML Regression Models from Scratch
 
-En este informe se presenta el desarrollo de un trabajo práctico de Machine Learning, donde se implementan modelos de IA desde cero, sin utilizar librerías como TensorFlow, PyTorch o Scikit-learn. En su lugar, se emplean únicamente herramientas como NumPy, Pandas, Matplotlib y Tqdm.
+This repository contains the solutions to the second practical assignment for the course "I302 - Machine Learning and Deep Learning" for the first semester of 2024.
 
-El trabajo aborda tres ejercicios distintos, cada uno centrado en la implementación de un modelo de Machine Learning y su aplicación en conjuntos de datos reales. La consigna completa del trabajo se encuentra detallada en el archivo PDF ubicado en la carpeta principal del repositorio.
+## Table of Contents
 
-## Ejercicio 1: Regresión Polinómica
+- [Introduction](#introduction)
+- [Problem Descriptions](#problem-descriptions)
+  - [1. Polynomial Regression](#1-polynomial-regression)
+  - [2. Ridge Linear Regression](#2-ridge-linear-regression)
+  - [3. Fully Connected Neural Network](#3-fully-connected-neural-network)
+- [Results](#results)
+  - [Polynomial Regression Results](#polynomial-regression-results)
+  - [Ridge Linear Regression Results](#ridge-linear-regression-results)
+  - [Fully Connected Neural Network Results](#fully-connected-neural-network-results)
 
-En este ejercicio, se implementa un modelo de regresión polinómica utilizando únicamente las herramientas mencionadas anteriormente. Se dispone de un archivo `.py` que contiene las funciones necesarias para realizar la regresión polinómica, y un archivo `.ipynb` que muestra la aplicación del modelo en un dataset con un único feature y target, ambos numéricos. Además, se incluyen demostraciones matemáticas en LaTeX para explicar conceptos clave.
+## Introduction
 
-## Ejercicio 2: Regresión Lineal con Regularización Ridge
+This repository contains a collection of Jupyter Notebooks and Python scripts developed for the second practical assignment of the "I302 - Machine Learning and Deep Learning" course. The assignment involves solving three different machine learning problems using only basic tools such as NumPy, Pandas, Matplotlib, and Tqdm. There is no use of high-level libraries such as TensorFlow, PyTorch, or Scikit-learn
 
-En este ejercicio, se trabaja con un dataset en formato CSV que contiene datos sobre el rendimiento de los alumnos. Se realiza un análisis exploratorio de los datos, incluyendo tanto features numéricos como categóricos, y se aplica feature engineering. Luego, se desarrolla una clase para realizar regresión lineal con regularización Ridge (L2). Además se utiliza cross validation para encontrar los mejores hiperparámetros del modelo.
+## Problem Descriptions
 
-## Ejercicio 3: Red Neuronal Fully Connected
+### 1. Polynomial Regression
 
-En este ejercicio, se utiliza el mismo dataset que en el ejercicio 2. Se desarrolla una clase para realizar predicciones utilizando una red neuronal fully connected y se aplican técnicas de cross validation para encontrar los mejores hiperparámetros del modelo.
+The goal is to fit a polynomial regression model to a dataset provided in the `toy dataset.pkl` file. The tasks include:
 
-## Conclusiones
+- Deriving the equations for the optimal parameters using the maximum likelihood principle.
+- Training models with various polynomial degrees and selecting the best model based on validation error.
+- Implementing regularization to prevent overfitting and selecting the best regularization parameter.
 
-A lo largo de este trabajo práctico, se han implementado modelos de IA desde cero, sin depender de librerías especializadas como TensorFlow o PyTorch. En su lugar, se han utilizado herramientas básicas como NumPy, Pandas, Matplotlib y Tqdm. Esta aproximación ha permitido un entendimiento más profundo de los algoritmos de Machine Learning y su aplicación en problemas del mundo real.
+### 2. Ridge Linear Regression
+
+In this problem, we work with the `Student Performance DEV.csv` dataset to develop a linear regression model with L2 regularization (Ridge Regression). The tasks include:
+
+- Implementing the Ridge Regression model and analyzing the impact of different features.
+- Tuning the regularization parameter using cross-validation.
+- Evaluating the model's performance using metrics such as RMSE, MAE, and R².
+
+### 3. Fully Connected Neural Network
+
+Using the same dataset from problem 2, this problem involves implementing a fully connected neural network. The tasks include:
+
+- Implementing the neural network from scratch, allowing for different depths and widths.
+- Using gradient descent and backpropagation for optimization.
+- Applying cross-validation to select the best hyperparameters, and comparing the performance against the Ridge Regression model.
+
+## Results
+
+### Polynomial Regression Results
+
+**(Include visual results and analysis here, such as error curves, validation vs training errors, etc.)**
+
+![Polynomial Regression](path/to/your/image.png)
+
+### Ridge Linear Regression Results
+
+**(Include visual results and analysis here, such as the comparison of model performance with different regularization parameters.)**
+
+![Ridge Regression](path/to/your/image.png)
+
+### Fully Connected Neural Network Results
+
+**(Include visual results and analysis here, showing the performance of the neural network across different configurations.)**
+
+![Neural Network Performance](path/to/your/image.png)
