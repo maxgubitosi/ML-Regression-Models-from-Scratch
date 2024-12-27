@@ -1,6 +1,6 @@
 # ML Regression Models from Scratch
 
-This repository contains the solutions to the second practical assignment for the course "I302 - Machine Learning and Deep Learning" for the first semester of 2024.
+This repository contains the solutions to the second practical assignment for the course "I302 - Machine Learning and Deep Learning" for the second semester of 2023.
 
 ## Table of Contents
 
