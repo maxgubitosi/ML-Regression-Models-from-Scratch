@@ -57,3 +57,7 @@ Using the same dataset from problem 2, this problem involves implementing a full
 ### Fully Connected Neural Network Results
 
 ![Neural Network Performance](3.png)
+
+### Contributions
+
+This practical assignment was developed by Máximo Gubitosi as part of the “I302 - Machine Learning and Deep Learning” course during the second semester of 2023.
